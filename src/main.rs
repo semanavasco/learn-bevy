@@ -2,12 +2,21 @@ use bevy::prelude::*;
 
 fn main() {
     App::new()
-        .add_systems(Startup, setup)
-        .add_systems(Update, print_names)
-        .add_systems(Update, people_with_jobs)
-        .add_systems(Update, people_ready_for_hire)
-        .add_systems(Update, person_does_job)
+        .add_plugins(DefaultPlugins)
+        .add_plugins(PeoplePlugin)
         .run();
+}
+
+pub struct PeoplePlugin;
+
+impl Plugin for PeoplePlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Startup, setup)
+            .add_systems(Update, print_names)
+            .add_systems(Update, people_with_jobs)
+            .add_systems(Update, people_ready_for_hire)
+            .add_systems(Update, person_does_job);
+    }
 }
 
 pub fn setup(mut commands: Commands) {
