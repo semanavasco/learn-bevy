@@ -131,8 +131,10 @@ pub fn enemy_movement(mut enemy_query: Query<(&mut Transform, &Enemy)>, time: Re
 }
 
 pub fn update_enemy_direction(
+    mut commands: Commands,
     mut enemy_query: Query<(&Transform, &mut Enemy)>,
     window_query: Query<&Window, With<PrimaryWindow>>,
+    asset_server: Res<AssetServer>,
 ) {
     let window = window_query.single().unwrap();
 
@@ -143,14 +145,30 @@ pub fn update_enemy_direction(
     let y_max = window.height() - half_enemy_size;
 
     for (transform, mut enemy) in enemy_query.iter_mut() {
+        let mut direction_changed = false;
         let translation = transform.translation;
 
         if translation.x < x_min || translation.x > x_max {
             enemy.direction.x *= -1.0;
+            direction_changed = true;
         }
 
         if translation.y < y_min || translation.y > y_max {
             enemy.direction.y *= -1.0;
+            direction_changed = true;
+        }
+
+        if direction_changed {
+            let sound_effect_1 = asset_server.load("audio/pluck_001.ogg");
+            let sound_effect_2 = asset_server.load("audio/pluck_002.ogg");
+
+            let sound_effect = if random::<f32>() > 0.5 {
+                sound_effect_1
+            } else {
+                sound_effect_2
+            };
+
+            commands.spawn(AudioPlayer::new(sound_effect));
         }
     }
 }
