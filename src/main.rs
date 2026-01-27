@@ -83,18 +83,8 @@ pub fn confine_player_movement(
 
         let mut translation = player_transform.translation;
 
-        // Bound the player x position
-        if translation.x < x_min {
-            translation.x = x_min;
-        } else if translation.x > x_max {
-            translation.x = x_max;
-        }
-        // Bound the player y position
-        if translation.y < y_min {
-            translation.y = y_min;
-        } else if translation.y > y_max {
-            translation.y = y_max;
-        }
+        translation.x = translation.x.clamp(x_min, x_max);
+        translation.y = translation.y.clamp(y_min, y_max);
 
         player_transform.translation = translation;
     }
