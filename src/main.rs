@@ -13,7 +13,7 @@ fn main() {
         .add_systems(Startup, spawn_player)
         .add_systems(Startup, spawn_enemies)
         .add_systems(Update, player_movement)
-        .add_systems(Update, confine_player_movement)
+        .add_systems(Update, confine_entity)
         .add_systems(Update, enemy_movement)
         .add_systems(Update, update_enemy_direction)
         .add_systems(Update, enemy_hit_player)
@@ -28,6 +28,11 @@ pub struct Enemy {
     pub direction: Vec2,
 }
 
+#[derive(Component)]
+pub struct Confined {
+    size: f32,
+}
+
 pub fn spawn_player(
     mut commands: Commands,
     window_query: Query<&Window, With<PrimaryWindow>>,
@@ -39,6 +44,9 @@ pub fn spawn_player(
         Sprite::from_image(asset_server.load("sprites/ball_blue_large.png")),
         Transform::from_xyz(window.width() / 2.0, window.height() / 2.0, 0.0),
         Player,
+        Confined {
+            size: CHARACTERS_SIZE,
+        },
     ));
 }
 
@@ -68,6 +76,9 @@ pub fn spawn_enemies(
             Transform::from_xyz(random_x, random_y, 0.0),
             Enemy {
                 direction: Vec2::new(random::<f32>(), random::<f32>()).normalize(),
+            },
+            Confined {
+                size: CHARACTERS_SIZE,
             },
         ));
     }
@@ -102,25 +113,23 @@ pub fn player_movement(
     }
 }
 
-pub fn confine_player_movement(
-    mut player_query: Query<&mut Transform, With<Player>>,
+pub fn confine_entity(
+    mut entity_query: Query<(&mut Transform, &Confined)>,
     window_query: Query<&Window, With<PrimaryWindow>>,
 ) {
-    if let Ok(mut player_transform) = player_query.single_mut() {
+    for (mut entity_transform, confined) in entity_query.iter_mut() {
         let window = window_query.single().unwrap();
 
-        let half_player_size = CHARACTERS_SIZE / 2.0;
-        let x_min = 0.0 + half_player_size;
-        let x_max = window.width() - half_player_size;
-        let y_min = 0.0 + half_player_size;
-        let y_max = window.height() - half_player_size;
+        let half_size = confined.size / 2.0;
+        let x_max = window.width() - half_size;
+        let y_max = window.height() - half_size;
 
-        let mut translation = player_transform.translation;
+        let mut translation = entity_transform.translation;
 
-        translation.x = translation.x.clamp(x_min, x_max);
-        translation.y = translation.y.clamp(y_min, y_max);
+        translation.x = translation.x.clamp(half_size, x_max);
+        translation.y = translation.y.clamp(half_size, y_max);
 
-        player_transform.translation = translation;
+        entity_transform.translation = translation;
     }
 }
 
