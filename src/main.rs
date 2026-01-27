@@ -1,10 +1,9 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 use rand::random;
 
-pub const PLAYER_SIZE: f32 = 64.0; // Player sprite size.
+pub const CHARACTERS_SIZE: f32 = 64.0;
 pub const PLAYER_SPEED: f32 = 500.0;
 pub const NUMBER_OF_ENEMIES: usize = 4;
-pub const ENEMY_SIZE: f32 = 64.0; // Enemy sprite size;
 pub const ENEMY_SPEED: f32 = 200.0;
 
 fn main() {
@@ -60,8 +59,9 @@ pub fn spawn_enemies(
     let window = window_query.single().unwrap();
 
     for _ in 0..NUMBER_OF_ENEMIES {
-        let random_x = random::<f32>() * (window.width() - ENEMY_SIZE) + ENEMY_SIZE / 2.0;
-        let random_y = random::<f32>() * (window.height() - ENEMY_SIZE) + ENEMY_SIZE / 2.0;
+        let random_x = random::<f32>() * (window.width() - CHARACTERS_SIZE) + CHARACTERS_SIZE / 2.0;
+        let random_y =
+            random::<f32>() * (window.height() - CHARACTERS_SIZE) + CHARACTERS_SIZE / 2.0;
 
         commands.spawn((
             Sprite::from_image(asset_server.load("sprites/ball_red_large.png")),
@@ -109,7 +109,7 @@ pub fn confine_player_movement(
     if let Ok(mut player_transform) = player_query.single_mut() {
         let window = window_query.single().unwrap();
 
-        let half_player_size = PLAYER_SIZE / 2.0;
+        let half_player_size = CHARACTERS_SIZE / 2.0;
         let x_min = 0.0 + half_player_size;
         let x_max = window.width() - half_player_size;
         let y_min = 0.0 + half_player_size;
@@ -139,7 +139,7 @@ pub fn update_enemy_direction(
 ) {
     let window = window_query.single().unwrap();
 
-    let half_enemy_size = ENEMY_SIZE / 2.0;
+    let half_enemy_size = CHARACTERS_SIZE / 2.0;
     let x_min = 0.0 + half_enemy_size;
     let x_max = window.width() - half_enemy_size;
     let y_min = 0.0 + half_enemy_size;
@@ -186,8 +186,8 @@ pub fn enemy_hit_player(
                 .translation
                 .distance(enemy_transform.translation);
 
-            let player_radius = PLAYER_SIZE / 2.0;
-            let enemy_radius = ENEMY_SIZE / 2.0;
+            let player_radius = CHARACTERS_SIZE / 2.0;
+            let enemy_radius = CHARACTERS_SIZE / 2.0;
 
             if distance < player_radius + enemy_radius {
                 println!("Enemy hit player! Game Over!");
