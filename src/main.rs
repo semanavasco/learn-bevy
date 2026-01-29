@@ -16,6 +16,7 @@ fn main() {
         .init_resource::<Score>()
         .init_resource::<StarSpawnTimer>()
         .init_resource::<EnemySpawnTimer>()
+        .add_message::<GameOver>()
         .add_systems(Startup, spawn_camera)
         .add_systems(Startup, spawn_player)
         .add_systems(Startup, spawn_enemies)
@@ -32,6 +33,7 @@ fn main() {
         .add_systems(Update, tick_enemy_spawn_timer)
         .add_systems(Update, spawn_enemies_over_time)
         .add_systems(Update, exit_game)
+        .add_systems(Update, handle_game_over)
         .run();
 }
 
@@ -80,6 +82,11 @@ impl Default for EnemySpawnTimer {
             timer: Timer::from_seconds(ENEMY_SPAWN_TIME, TimerMode::Repeating),
         }
     }
+}
+
+#[derive(Message)]
+pub struct GameOver {
+    pub score: u32,
 }
 
 pub fn spawn_player(
@@ -253,9 +260,11 @@ pub fn update_enemy_direction(
 
 pub fn enemy_hit_player(
     mut commands: Commands,
+    mut game_over_message_writer: MessageWriter<GameOver>,
     mut player_query: Query<(Entity, &Transform), With<Player>>,
     enemy_query: Query<&Transform, With<Enemy>>,
     asset_server: Res<AssetServer>,
+    score: Res<Score>,
 ) {
     if let Ok((player_entity, player_transform)) = player_query.single_mut() {
         for enemy_transform in enemy_query.iter() {
@@ -272,6 +281,8 @@ pub fn enemy_hit_player(
                 let sound_effect = asset_server.load("audio/explosionCrunch_000.ogg");
                 commands.spawn(AudioPlayer::new(sound_effect));
                 commands.entity(player_entity).despawn();
+
+                game_over_message_writer.write(GameOver { score: score.value });
             }
         }
     }
@@ -369,5 +380,11 @@ pub fn exit_game(
 ) {
     if keyboard_input.just_pressed(KeyCode::Escape) {
         app_exit_writer.write(AppExit::Success);
+    }
+}
+
+pub fn handle_game_over(mut game_over_message_reader: MessageReader<GameOver>) {
+    for event in game_over_message_reader.read() {
+        println!("Your final score is: {}", event.score);
     }
 }
