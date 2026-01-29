@@ -31,6 +31,7 @@ fn main() {
         .add_systems(Update, spawn_stars_over_time)
         .add_systems(Update, tick_enemy_spawn_timer)
         .add_systems(Update, spawn_enemies_over_time)
+        .add_systems(Update, exit_game)
         .run();
 }
 
@@ -359,5 +360,14 @@ pub fn spawn_enemies_over_time(
                 size: CHARACTERS_SIZE,
             },
         ));
+    }
+}
+
+pub fn exit_game(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut app_exit_writer: MessageWriter<AppExit>,
+) {
+    if keyboard_input.just_pressed(KeyCode::Escape) {
+        app_exit_writer.write(AppExit::Success);
     }
 }
