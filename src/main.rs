@@ -20,6 +20,7 @@ fn main() {
         .add_systems(Update, enemy_movement)
         .add_systems(Update, update_enemy_direction)
         .add_systems(Update, enemy_hit_player)
+        .add_systems(Update, player_hit_star)
         .run();
 }
 
@@ -229,6 +230,29 @@ pub fn enemy_hit_player(
                 let sound_effect = asset_server.load("audio/explosionCrunch_000.ogg");
                 commands.spawn(AudioPlayer::new(sound_effect));
                 commands.entity(player_entity).despawn();
+            }
+        }
+    }
+}
+
+pub fn player_hit_star(
+    mut commands: Commands,
+    player_query: Query<&Transform, With<Player>>,
+    star_query: Query<(Entity, &Transform), With<Star>>,
+    asset_server: Res<AssetServer>,
+) {
+    if let Ok(player_transform) = player_query.single() {
+        for (star_entity, star_transform) in star_query.iter() {
+            let distance = player_transform
+                .translation
+                .distance(star_transform.translation);
+
+            if distance < CHARACTERS_SIZE / 2.0 + STAR_SIZE / 2.0 {
+                println!("Player hit star!");
+
+                let sound_effect = asset_server.load("audio/laserLarge_000.ogg");
+                commands.spawn(AudioPlayer::new(sound_effect));
+                commands.entity(star_entity).despawn();
             }
         }
     }
