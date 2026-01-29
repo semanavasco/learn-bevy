@@ -11,6 +11,7 @@ pub const STAR_SIZE: f32 = 30.0;
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
+        .init_resource::<Score>()
         .add_systems(Startup, spawn_camera)
         .add_systems(Startup, spawn_player)
         .add_systems(Startup, spawn_enemies)
@@ -21,6 +22,7 @@ fn main() {
         .add_systems(Update, update_enemy_direction)
         .add_systems(Update, enemy_hit_player)
         .add_systems(Update, player_hit_star)
+        .add_systems(Update, update_score)
         .run();
 }
 
@@ -39,6 +41,11 @@ pub struct Confined {
 
 #[derive(Component)]
 pub struct Star;
+
+#[derive(Resource, Default)]
+pub struct Score {
+    pub value: u32,
+}
 
 pub fn spawn_player(
     mut commands: Commands,
@@ -240,6 +247,7 @@ pub fn player_hit_star(
     player_query: Query<&Transform, With<Player>>,
     star_query: Query<(Entity, &Transform), With<Star>>,
     asset_server: Res<AssetServer>,
+    mut score: ResMut<Score>,
 ) {
     if let Ok(player_transform) = player_query.single() {
         for (star_entity, star_transform) in star_query.iter() {
@@ -250,10 +258,18 @@ pub fn player_hit_star(
             if distance < CHARACTERS_SIZE / 2.0 + STAR_SIZE / 2.0 {
                 println!("Player hit star!");
 
+                score.value += 1;
+
                 let sound_effect = asset_server.load("audio/laserLarge_000.ogg");
                 commands.spawn(AudioPlayer::new(sound_effect));
                 commands.entity(star_entity).despawn();
             }
         }
+    }
+}
+
+pub fn update_score(score: Res<Score>) {
+    if score.is_changed() {
+        println!("Score: {}", score.value.to_string());
     }
 }
