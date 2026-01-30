@@ -12,7 +12,7 @@ pub fn spawn_camera(mut commands: Commands, window_query: Query<&Window, With<Pr
     ));
 }
 
-pub fn confine_entity(
+pub fn confine_entity_movement(
     mut entity_query: Query<(&mut Transform, &Confined)>,
     window_query: Query<&Window, With<PrimaryWindow>>,
 ) {

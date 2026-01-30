@@ -1,21 +1,22 @@
 mod components;
-mod events;
-mod systems;
-
 pub mod enemy;
+mod events;
 mod player;
 pub mod score;
+pub mod sets;
 pub mod star;
-
-use events::*;
-use systems::*;
+mod systems;
 
 use enemy::EnemyPlugin;
+use events::*;
 use player::PlayerPlugin;
 use score::ScorePlugin;
 use star::StarPlugin;
+use systems::*;
 
 use bevy::prelude::*;
+
+use crate::sets::MovementSet;
 
 fn main() {
     App::new()
@@ -26,7 +27,7 @@ fn main() {
         .add_plugins(StarPlugin)
         .add_plugins(ScorePlugin)
         .add_systems(Startup, spawn_camera)
-        .add_systems(Update, confine_entity)
+        .add_systems(Update, confine_entity_movement.after(MovementSet))
         .add_systems(Update, exit_game)
         .add_systems(Update, handle_game_over)
         .run();
