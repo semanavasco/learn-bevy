@@ -3,10 +3,12 @@ use bevy::{prelude::*, window::PrimaryWindow};
 use super::{PLAYER_SIZE, PLAYER_SPEED, components::Player};
 use crate::{
     components::Confined,
-    enemy::{ENEMY_SIZE, components::Enemy},
     events::GameOver,
-    score::resources::Score,
-    star::{STAR_SIZE, components::Star},
+    game::{
+        enemy::{ENEMY_SIZE, components::Enemy},
+        score::resources::Score,
+        star::{STAR_SIZE, components::Star},
+    },
 };
 
 pub fn spawn_player(
